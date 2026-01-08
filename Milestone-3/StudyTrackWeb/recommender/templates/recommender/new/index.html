@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyTrack AI – Student Study Habit Analysis System</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #4a6fa5 0%, #2c3e50 100%);
+            color: white;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            border-bottom: 4px solid #3498db;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2.5rem 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .nav-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #eaeaea;
+            text-align: center;
+        }
+
+        /* Navigation Cards */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .nav-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.75rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            border: 1px solid #eaeaea;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+            border-color: #3498db;
+        }
+
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: #3498db;
+            transition: width 0.3s ease;
+        }
+
+        .nav-card:hover::before {
+            width: 8px;
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #f0f7ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3498db;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-desc {
+            color: #5d6d7e;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .card-link {
+            color: #3498db;
+            font-weight: 500;
+            margin-top: 1rem;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+            font-size: 0.95rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .nav-grid {
+                grid-template-columns: 1fr;
+                gap: 1.2rem;
+            }
+            
+            .nav-card {
+                padding: 1.5rem;
+            }
+            
+            .main-content {
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 2rem 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .card-icon {
+                font-size: 2rem;
+                width: 50px;
+                height: 50px;
+            }
+            
+            .card-title {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <h1>StudyTrack AI</h1>
+        <p>Student Study Habit Analysis & Recommendation System</p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <section class="nav-section">
+            <h2 class="section-title">Navigation Menu</h2>
+            <div class="nav-grid">
+                <!-- Upload Dataset Card -->
+                <a href="/upload/" class="nav-card">
+                    <div class="card-icon">📊</div>
+                    <h3 class="card-title">Upload Dataset</h3>
+                    <p class="card-desc">Upload CSV or Excel file containing student study data to train the ML model</p>
+                    <span class="card-link">Go to Upload →</span>
+                </a>
+
+                <!-- Train Model Card -->
+                <a href="/train/" class="nav-card">
+                    <div class="card-icon">🤖</div>
+                    <h3 class="card-title">Train Model</h3>
+                    <p class="card-desc">Train machine learning models using the uploaded dataset to analyze study patterns</p>
+                    <span class="card-link">Go to Train →</span>
+                </a>
+
+                <!-- Predict Performance Card -->
+                <a href="/predict/" class="nav-card">
+                    <div class="card-icon">🔮</div>
+                    <h3 class="card-title">Predict Performance</h3>
+                    <p class="card-desc">Predict test marks and attention levels based on student study habits</p>
+                    <span class="card-link">Go to Predict →</span>
+                </a>
+
+                <!-- View Recommendations Card -->
+                <a href="/recommendations/" class="nav-card">
+                    <div class="card-icon">💡</div>
+                    <h3 class="card-title">View Recommendations</h3>
+                    <p class="card-desc">Get personalized habit improvement suggestions for better academic performance</p>
+                    <span class="card-link">Go to Recommendations →</span>
+                </a>
+
+                <!-- Model Accuracy Card -->
+                <a href="/accuracy/" class="nav-card">
+                    <div class="card-icon">📈</div>
+                    <h3 class="card-title">Model Accuracy</h3>
+                    <p class="card-desc">View training accuracy and evaluation metrics of the machine learning models</p>
+                    <span class="card-link">Go to Accuracy →</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2026 StudyTrack AI | Academic Project</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | StudyTrack AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-primary: #4338ca; 
+            --brand-secondary: #6366f1;
+            --brand-accent: #fbbf24; 
+            --bg-dark: #0f172a;
+            --text-main: #1e293b;
+            --glass-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background: #f1f5f9;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        /* Animated Mesh Background */
+        .mesh-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(67, 56, 202, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(251, 191, 36, 0.08) 0px, transparent 50%);
+        }
+
+        .login-container {
+            display: flex;
+            max-width: 1000px;
+            width: 100%;
+            min-height: 600px;
+            background: var(--glass-bg);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.15);
+            border: 1px solid white;
+            animation: containerAppear 0.6s ease-out;
+        }
+
+        @keyframes containerAppear {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Branding Side */
+        .welcome-section {
+            flex: 1;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1e1b4b 100%);
+            color: white;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .brand-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .custom-logo {
+            width: 45px;
+            height: 45px;
+        }
+
+        .brand-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-name span { color: var(--brand-accent); }
+
+        .welcome-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.4rem;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+        }
+
+        .feature-item i {
+            color: var(--brand-accent);
+            font-size: 1.1rem;
+        }
+
+        /* Form Side */
+        .login-form-section {
+            flex: 1;
+            padding: 50px 60px;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-header { margin-bottom: 35px; }
+
+        .form-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--bg-dark);
+        }
+
+        .input-group { margin-bottom: 20px; }
+
+        .input-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            color: #64748b;
+        }
+
+        .input-wrapper { position: relative; }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            border: 2px solid #f1f5f9;
+            background: #f8fafc;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: 0.2s;
+            outline: none;
+        }
+
+        .input-wrapper input:focus {
+            border-color: var(--brand-primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(67, 56, 202, 0.05);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: var(--brand-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: var(--brand-secondary);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px -5px rgba(67, 56, 202, 0.4);
+        }
+
+        /* Create Account Section */
+        .register-footer {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #f1f5f9;
+            text-align: center;
+        }
+
+        .register-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 30px;
+            background: #eff6ff;
+            color: var(--brand-primary);
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            border: 1px solid rgba(67, 56, 202, 0.1);
+        }
+
+        .register-btn:hover {
+            background: var(--brand-primary);
+            color: white;
+        }
+
+        @media (max-width: 850px) {
+            .login-container { flex-direction: column; max-width: 450px; }
+            .welcome-section { display: none; } /* Hide branding on mobile for focus */
+            .login-form-section { padding: 40px 30px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mesh-bg"></div>
+    
+    <div class="login-container">
+        <div class="welcome-section">
+            <div class="brand-logo-container">
+                <svg class="custom-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="20" y="20" width="60" height="60" rx="12" fill="url(#grad)" />
+                    <path d="M40 65V35L65 50L40 65Z" fill="white" />
+                    <defs>
+                        <linearGradient id="grad" x1="0" y1="0" x2="100" y2="100">
+                            <stop stop-color="#6366f1"/>
+                            <stop offset="1" stop-color="#4338ca"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div class="brand-name">StudyTrack<span>AI</span></div>
+            </div>
+            
+            <h1 class="welcome-title">Elevate Your <br>Learning.</h1>
+            
+            <div class="feature-item">
+                <i class="fas fa-check-circle"></i>
+                <span>AI-Powered Study Schedules</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-check-circle"></i>
+                <span>Real-time Progress Analytics</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-check-circle"></i>
+                <span>Smart Resource Recommendations</span>
+            </div>
+        </div>
+        
+        <div class="login-form-section">
+            <div class="form-header">
+                <h2 class="form-title">Member Login</h2>
+                <p style="color: #64748b; margin-top: 5px;">Access your personalized dashboard</p>
+            </div>
+
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                <div class="input-group">
+                    <label>Username or Email</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="username" placeholder="e.g. scholar_01" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="password" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #64748b; cursor: pointer;">
+                        <input type="checkbox" style="accent-color: var(--brand-primary);"> Remember me
+                    </label>
+                    <a href="{% url 'reset_password' %}" style="color: var(--brand-primary); font-size: 0.85rem; text-decoration: none; font-weight: 600;">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Sign In
+                </button>
+            </form>
+            
+            <div class="register-footer">
+                <p style="font-size: 0.9rem; color: #64748b;">Don't have an account yet?</p>
+                <a href="{% url 'register' %}" class="register-btn">Create New Account</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

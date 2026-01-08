@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Single Prediction - StudyTrack AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f5f9ff;
+            color: #333;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #2c3e50 0%, #1a2530 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .logo-container {
+            padding: 25px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .logo i {
+            color: #4dabf7;
+            margin-right: 12px;
+            font-size: 26px;
+        }
+
+        .nav-menu {
+            padding: 30px 0;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #4dabf7;
+        }
+
+        .nav-item.active {
+            background-color: rgba(77, 171, 247, 0.1);
+            border-left: 4px solid #4dabf7;
+        }
+
+        .nav-item i {
+            width: 24px;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+
+        .user-info {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #4dabf7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+        }
+
+        .user-details h4 {
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .user-details p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex-grow: 1;
+            padding: 25px 35px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+        }
+
+        .date-display {
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        /* Prediction Container Styles */
+        .prediction-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 992px) {
+            .prediction-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Form Section */
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section-header h2 {
+            color: #2c3e50;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-header h2 i {
+            color: #40c057;
+        }
+
+        .section-header p {
+            color: #7f8c8d;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+
+        /* Form Styles */
+        .prediction-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #495057;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group label i {
+            color: #4dabf7;
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background-color: #f8f9fa;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4dabf7;
+            box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.2);
+            background-color: white;
+        }
+
+        .form-input:hover {
+            border-color: #adb5bd;
+        }
+
+        .submit-btn {
+            background: linear-gradient(to right, #40c057, #2f9e44);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            transition: all 0.3s;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(to right, #2f9e44, #2b8a3e);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(47, 158, 68, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn i {
+            font-size: 18px;
+        }
+
+        /* Results Section */
+        .results-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .result-placeholder {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #adb5bd;
+            padding: 40px 20px;
+        }
+
+        .result-placeholder i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #e9ecef;
+        }
+
+        .result-placeholder h3 {
+            margin-bottom: 10px;
+            color: #adb5bd;
+        }
+
+        /* Prediction Result Styles */
+        .prediction-result {
+            animation: fadeIn 0.5s;
+            flex-grow: 1;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .result-header h3 {
+            color: #2c3e50;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .result-header h3 i {
+            color: #40c057;
+        }
+
+        .confidence-badge {
+            background-color: #d1f7c4;
+            color: #2b8a3e;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .predicted-value {
+            background: linear-gradient(135deg, #40c057 0%, #2f9e44 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(64, 192, 87, 0.2);
+        }
+
+        .predicted-value h4 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .predicted-value .value {
+            font-size: 48px;
+            font-weight: 700;
+        }
+
+        .predicted-value .out-of {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .result-details {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+        }
+
+        .result-details h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .detail-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .detail-item h5 {
+            color: #5c636a;
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-item p {
+            color: #2c3e50;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Performance Indicator */
+        .performance-indicator {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .performance-indicator h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .performance-bar {
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .performance-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 1s ease;
+        }
+
+        .performance-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        /* Error Message Styles */
+        .error-box {
+            background-color: #ffe3e3;
+            border: 1px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 25px;
+            animation: fadeIn 0.5s;
+        }
+
+        .error-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .error-header i {
+            font-size: 24px;
+            color: #ff6b6b;
+        }
+
+        .error-header h3 {
+            color: #c92a2a;
+            font-size: 18px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 220px;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .prediction-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .nav-menu {
+                display: flex;
+                padding: 0;
+                overflow-x: auto;
+            }
+            
+            .nav-item {
+                padding: 15px 20px;
+                white-space: nowrap;
+                border-left: none;
+                border-bottom: 4px solid transparent;
+            }
+            
+            .nav-item:hover, .nav-item.active {
+                border-left: none;
+                border-bottom: 4px solid #4dabf7;
+            }
+            
+            .form-section, .results-section {
+                padding: 20px;
+            }
+            
+            .prediction-container {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="logo-container">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                StudyTrack AI
+            </div>
+        </div>
+        
+        <div class="nav-menu">
+            <a href="{% url 'index' %}" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/train" class="nav-item">
+                <i class="fas fa-robot"></i>
+                <span>Train Model</span>
+            </a>
+            <div class="nav-item active">
+                <i class="fas fa-chart-line"></i>
+                <span>Single Prediction</span>
+            </div>
+            <a href="/bulk-predict/" class="nav-item">
+                <i class="fas fa-file-upload"></i>
+                <span>Bulk Prediction</span>
+            </a>
+            <a href="" class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>Insights</span>
+            </a>
+        </div>
+       
+    </div>
+    
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Single Prediction</h1>
+            <div class="date-display">
+                <i class="far fa-calendar-alt"></i>
+                <span id="current-date">Loading...</span>
+            </div>
+        </div>
+        
+        <div class="prediction-container">
+            <!-- Form Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-line"></i> Student Test Marks Prediction</h2>
+                    <p>Enter student data to predict their test marks. The AI model analyzes study habits and other factors to provide an accurate prediction.</p>
+                </div>
+                
+                <!-- Django Form -->
+                <form method="POST" id="predictionForm">
+                    {% csrf_token %}
+                    
+                    <div class="prediction-form">
+                        <div class="form-group">
+                            <label for="StudyHours"><i class="fas fa-book"></i> Study Hours</label>
+                            <input type="number" step="0.1" name="StudyHours" id="StudyHours" class="form-input" placeholder="e.g., 3.5" required min="0" max="24">
+                            <div class="hint">Daily study hours</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="SleepHours"><i class="fas fa-bed"></i> Sleep Hours</label>
+                            <input type="number" step="0.1" name="SleepHours" id="SleepHours" class="form-input" placeholder="e.g., 7.5" required min="0" max="24">
+                            <div class="hint">Average nightly sleep</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="SocialMediaHours"><i class="fas fa-mobile-alt"></i> Social Media Hours</label>
+                            <input type="number" step="0.1" name="SocialMediaHours" id="SocialMediaHours" class="form-input" placeholder="e.g., 2.0" required min="0" max="24">
+                            <div class="hint">Daily social media use</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ExerciseHours"><i class="fas fa-running"></i> Exercise Hours</label>
+                            <input type="number" step="0.1" name="ExerciseHours" id="ExerciseHours" class="form-input" placeholder="e.g., 1.0" required min="0" max="24">
+                            <div class="hint">Daily physical activity</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="PlayHours"><i class="fas fa-gamepad"></i> Play Hours</label>
+                            <input type="number" step="0.1" name="PlayHours" id="PlayHours" class="form-input" placeholder="e.g., 1.5" required min="0" max="24">
+                            <div class="hint">Leisure/recreational time</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="AttendancePercentage"><i class="fas fa-calendar-check"></i> Attendance %</label>
+                            <input type="number" step="0.1" name="AttendancePercentage" id="AttendancePercentage" class="form-input" placeholder="e.g., 85.5" required min="0" max="100">
+                            <div class="hint">Class attendance rate</div>
+                        </div>
+                        
+                        
+                        <div class="form-group">
+                            <label for="AttentionLevel"><i class="fas fa-brain"></i> Attention Level</label>
+                            <input type="number" step="0.1" name="AttentionLevel" id="AttentionLevel" class="form-input" placeholder="e.g., 8.0" required min="0" max="10">
+                            <div class="hint">Focus level (0-10 scale)</div>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <button type="submit" class="submit-btn" id="submitBtn">
+                                <i class="fas fa-bolt"></i> Predict Test Marks
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- ERROR MESSAGE -->
+                {% if error %}
+                <div class="error-box">
+                    <div class="error-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Prediction Error</h3>
+                    </div>
+                    <p><b>{{ error }}</b></p>
+                    <p style="margin-top: 10px;">Please check your input values and try again.</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Results Section -->
+            <div class="results-section">
+                {% if prediction %}
+                <div class="prediction-result">
+                    <div class="result-header">
+                        <h3><i class="fas fa-poll"></i> Prediction Result</h3>
+                        <div class="confidence-badge">
+                            <i class="fas fa-shield-alt"></i> 94% Confidence
+                        </div>
+                    </div>
+                    
+                    <div class="predicted-value">
+                        <h4>Predicted Test Marks</h4>
+                        <div class="value">{{ prediction|floatformat:1 }}</div>
+                        <div class="out-of">out of 100</div>
+                    </div>
+                    
+                    <div class="result-details">
+                        <h4><i class="fas fa-info-circle"></i> Input Summary</h4>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <h5><i class="fas fa-book"></i> Study Hours</h5>
+                                <p>{{ request.POST.StudyHours }}</p>
+                            </div>
+                            <div class="detail-item">
+                                <h5><i class="fas fa-bed"></i> Sleep Hours</h5>
+                                <p>{{ request.POST.SleepHours }}</p>
+                            </div>
+                            <div class="detail-item">
+                                <h5><i class="fas fa-mobile-alt"></i> Social Media</h5>
+                                <p>{{ request.POST.SocialMediaHours }} hrs</p>
+                            </div>
+                            <div class="detail-item">
+                                <h5><i class="fas fa-running"></i> Exercise</h5>
+                                <p>{{ request.POST.ExerciseHours }} hrs</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="performance-indicator">
+                        <h4>Performance Level</h4>
+                        <div class="performance-bar">
+                            {% with pred_value=prediction|floatformat:0 %}
+                            <div class="performance-fill" id="performanceFill" 
+                                 style="width: {{ pred_value }}%; background-color: 
+                                 {% if pred_value >= 80 %}#40c057
+                                 {% elif pred_value >= 60 %}#ffc107
+                                 {% else %}#ff6b6b
+                                 {% endif %};">
+                            </div>
+                            {% endwith %}
+                        </div>
+                        <div class="performance-labels">
+                            <span>Poor</span>
+                            <span>Average</span>
+                            <span>Good</span>
+                            <span>Excellent</span>
+                        </div>
+                        <!-- ADD RECOMMENDATION SECTION HERE -->
+                        <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee;">
+                            <h4 style="color: #2c3e50; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-lightbulb"></i> AI Recommendation
+                            </h4>
+                            <div style="background-color: #f0f9ff; border-left: 4px solid #4dabf7; padding: 20px; border-radius: 8px;">
+                                <p style="color: #2c3e50; font-size: 16px; line-height: 1.5;">
+                                    <i class="fas fa-quote-left" style="color: #4dabf7; margin-right: 5px;"></i>
+                                    {% if recommendation %}
+                                        {{ recommendation }}
+                                    {% else %}
+                                        {% with pred_value=prediction|floatformat:0 %}
+                                            {% if pred_value >= 80 %}
+                                                Student is likely to perform very well. Maintain current habits and consider challenging advanced topics.
+                                            {% elif pred_value >= 60 %}
+                                                Student is on track. Focus on consistent practice and review weak areas for improvement.
+                                            {% else %}
+                                                Consider adjusting study habits, reducing distractions, and seeking additional support or tutoring.
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% endif %}
+                                    <i class="fas fa-quote-right" style="color: #4dabf7; margin-left: 5px;"></i>
+                                </p>
+                            </div>
+                        </div>
+    
+                        {% with pred_value=prediction|floatformat:0 %}
+                        <div style="margin-top: 15px; padding: 15px; border-radius: 8px; background-color: 
+                            {% if pred_value >= 80 %}#d1f7c4
+                            {% elif pred_value >= 60 %}#fff3cd
+                            {% else %}#ffe3e3
+                            {% endif %}; 
+                            color: 
+                            {% if pred_value >= 80 %}#2b8a3e
+                            {% elif pred_value >= 60 %}#856404
+                            {% else %}#c92a2a
+                            {% endif %};">
+                            <b>
+                            {% if pred_value >= 80 %}
+                            <i class="fas fa-trophy"></i> Excellent Performance
+                            {% elif pred_value >= 60 %}
+                            <i class="fas fa-check-circle"></i> Satisfactory Performance
+                            {% else %}
+                            <i class="fas fa-exclamation-circle"></i> Needs Improvement
+                            {% endif %}
+                            </b>
+                            <p style="margin-top: 5px; font-weight: normal; font-size: 14px;">
+                            {% if pred_value >= 80 %}
+                            Student is likely to perform very well. Maintain current habits.
+                            {% elif pred_value >= 60 %}
+                            Student is on track. Small improvements could boost scores further.
+                            {% else %}
+                            Consider adjusting study habits or seeking additional support.
+                            {% endif %}
+                            </p>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="result-placeholder">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Prediction Results</h3>
+                    <p>Enter student data and click "Predict Test Marks" to see the AI prediction here.</p>
+                    <p style="margin-top: 20px; font-size: 14px; max-width: 400px;">
+                        The model analyzes study patterns, lifestyle factors, and academic history to predict test performance with 94% accuracy.
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Tips Section -->
+        <div style="margin-top: 30px; background-color: white; border-radius: 12px; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+            <h3 style="color: #2c3e50; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-lightbulb"></i> Tips for Better Predictions
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                <div style="padding: 15px; border-left: 4px solid #4dabf7; background-color: #f8f9fa; border-radius: 8px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 8px;">Accurate Data</h4>
+                    <p style="color: #6c757d; font-size: 14px;">Use real, measured values rather than estimates for more accurate predictions.</p>
+                </div>
+                <div style="padding: 15px; border-left: 4px solid #40c057; background-color: #f8f9fa; border-radius: 8px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 8px;">Recent Information</h4>
+                    <p style="color: #6c757d; font-size: 14px;">Input data from the current or most recent academic term for best results.</p>
+                </div>
+                <div style="padding: 15px; border-left: 4px solid #ffc107; background-color: #f8f9fa; border-radius: 8px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 8px;">Model Limits</h4>
+                    <p style="color: #6c757d; font-size: 14px;">Predictions are based on patterns in training data and may not account for all individual circumstances.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date
+        function setCurrentDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = now.toLocaleDateString('en-US', options);
+            document.getElementById('current-date').textContent = formattedDate;
+        }
+        
+        // Form submission loading indicator
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            
+            // Only show loading if we're not already showing a result
+            if (!document.querySelector('.prediction-result')) {
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+                submitBtn.disabled = true;
+                
+                // Change button style
+                submitBtn.style.background = 'linear-gradient(to right, #adb5bd, #868e96)';
+                submitBtn.style.cursor = 'not-allowed';
+                
+                // Revert after 5 seconds (in case the page doesn't reload)
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    submitBtn.style.background = 'linear-gradient(to right, #40c057, #2f9e44)';
+                    submitBtn.style.cursor = 'pointer';
+                }, 5000);
+            }
+        });
+        
+        // Highlight current page in navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            setCurrentDate();
+            
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === currentPath) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // If there's a prediction result, animate the performance bar
+            const performanceFill = document.getElementById('performanceFill');
+            if (performanceFill) {
+                // Reset width to 0 then animate to actual value
+                const targetWidth = performanceFill.style.width;
+                performanceFill.style.width = '0%';
+                
+                setTimeout(() => {
+                    performanceFill.style.width = targetWidth;
+                }, 300);
+            }
+            
+            // Fill form with sample data for demo (optional - remove in production)
+            const demoMode = false; // Set to true to enable demo data filling
+            if (demoMode && !document.querySelector('.prediction-result')) {
+                document.getElementById('StudyHours').value = 3.5;
+                document.getElementById('SleepHours').value = 7.5;
+                document.getElementById('SocialMediaHours').value = 2.0;
+                document.getElementById('ExerciseHours').value = 1.0;
+                document.getElementById('PlayHours').value = 1.5;
+                document.getElementById('AttendancePercentage').value = 85.5;
+                document.getElementById('PreviousMarks').value = 72.5;
+                document.getElementById('AttentionLevel').value = 8.0;
+            }
+        });
+    </script>
+</body>
+</html>

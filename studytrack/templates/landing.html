@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyTrack AI | Next-Gen Academic Intelligence</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --deep-space: #020617;
+            --glass: rgba(15, 23, 42, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --electric-indigo: #6366f1;
+            --phlox-purple: #a855f7;
+            --cyber-cyan: #22d3ee;
+            --text-pure: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--deep-space);
+            color: var(--text-pure);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 40%);
+        }
+
+        /* --- Loading Screen with StudyTrack AI --- */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: var(--deep-space);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.6s ease;
+        }
+
+        .loader-brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--electric-indigo), var(--phlox-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            animation: textPulse 2s infinite ease-in-out;
+        }
+
+        .loader-bar-container {
+            width: 200px;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .loader-bar-progress {
+            height: 100%;
+            width: 0%;
+            background: var(--electric-indigo);
+            box-shadow: 0 0 15px var(--electric-indigo);
+            animation: barLoad 2s forwards ease-in-out;
+        }
+
+        @keyframes textPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(0.98); }
+        }
+
+        @keyframes barLoad {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        /* --- Header --- */
+        header {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 1rem 5%;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--text-pure);
+        }
+
+        .brand-icon {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, var(--electric-indigo), var(--phlox-purple));
+            border-radius: 10px;
+            display: grid; place-items: center;
+        }
+
+        nav ul { display: flex; list-style: none; gap: 30px; }
+        nav a { text-decoration: none; color: var(--text-muted); font-weight: 500; transition: 0.3s; }
+        nav a:hover { color: var(--electric-indigo); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--electric-indigo), var(--phlox-purple));
+            color: white; padding: 10px 24px; border-radius: 10px;
+            text-decoration: none; font-weight: 600; display: inline-block;
+            transition: 0.3s;
+        }
+
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4); }
+
+        /* --- Hero --- */
+        .hero {
+            padding: 12rem 5% 6rem;
+            text-align: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.2rem, 7vw, 4.5rem);
+            line-height: 1.1; margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, var(--electric-indigo), var(--cyber-cyan), var(--phlox-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem; color: var(--text-muted);
+            margin-bottom: 35px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* --- Cards --- */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px; padding: 0 5% 8rem;
+            max-width: 1400px; margin: 0 auto;
+        }
+
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 40px; border-radius: 24px;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+        }
+
+        .card:hover { border-color: var(--electric-indigo); background: rgba(30, 41, 59, 0.9); transform: translateY(-5px); }
+
+        .card-icon { font-size: 2rem; color: var(--cyber-cyan); margin-bottom: 20px; }
+
+        .reveal { opacity: 0; transform: translateY(20px); transition: 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        footer {
+            padding: 60px 5% 30px;
+            background: #010411;
+            border-top: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .footer-links { display: flex; justify-content: center; gap: 30px; margin: 20px 0; list-style: none; }
+        .footer-links a { color: var(--text-muted); text-decoration: none; }
+
+        @media (max-width: 768px) {
+            nav, .auth-btns { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="loader-brand">StudyTrack AI</div>
+        <div class="loader-bar-container">
+            <div class="loader-bar-progress"></div>
+        </div>
+        <p style="margin-top: 15px; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 2px;">NEURAL ENGINE SYNCING</p>
+    </div>
+
+    <header>
+        <div class="nav-container">
+            <a href="#" class="brand">
+                <div class="brand-icon"><i class="fas fa-brain"></i></div>
+                <span>StudyTrack AI</span>
+            </a>
+            
+            <nav>
+                <ul>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+            </nav>
+            
+            <div class="auth-btns">
+                <a href="{% url 'login' %}" style="color: var(--text-pure); text-decoration: none; margin-right: 20px;">Login</a>
+                <a href="{% url 'register' %}" class="btn-primary">Join Now</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1 class="reveal">Predict Your Future <br><span class="gradient-text">Master Your Grades</span></h1>
+            
+            <p class="reveal">Don't just study—study smart. Our AI analyzes your learning patterns to forecast exam results and guide you to the top of your class.</p>
+            <div class="reveal">
+                <a href="{% url 'register' %}" class="btn-primary" style="padding: 14px 32px; font-size: 1.1rem;">Get Started Now</a>
+            </div>
+        </section>
+
+        <section class="features" id="features">
+            <div class="features-grid">
+                <div class="card reveal">
+                    <i class="fas fa-microchip card-icon"></i>
+                    <h3>Smart Predictions</h3>
+                    <p>Advanced algorithms forecast your scores based on real-time data input and study velocity.</p>
+                </div>
+                <div class="card reveal">
+                    <i class="fas fa-dna card-icon"></i>
+                    <h3>Custom Paths</h3>
+                    <p>Learning journeys tailored specifically to your cognitive strengths and memory retention.</p>
+                </div>
+                <div class="card reveal">
+                    <i class="fas fa-shield-halved card-icon"></i>
+                    <h3>Risk Shield</h3>
+                    <p>Get alerted before academic burnout or learning gaps impact your final performance.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="brand" style="justify-content: center; margin-bottom: 20px;">
+            <div class="brand-icon"><i class="fas fa-brain"></i></div>
+            <span>StudyTrack AI</span>
+        </div>
+        <ul class="footer-links">
+            <li><a href="#">Terms</a></li>
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Support</a></li>
+        </ul>
+        <p style="color: var(--text-muted); font-size: 0.8rem;">&copy; 2025 StudyTrack AI. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Loader logic
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 600);
+            }, 2200);
+        });
+
+        // Simple Reveal logic
+        function reveal() {
+            const reveals = document.querySelectorAll(".reveal");
+            reveals.forEach(el => {
+                const windowHeight = window.innerHeight;
+                const elementTop = el.getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) {
+                    el.classList.add("active");
+                }
+            });
+        }
+        window.addEventListener("scroll", reveal);
+        reveal();
+    </script>
+</body>
+</html>

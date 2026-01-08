@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Training Engine | StudyTrack AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --infy-navy: #004685;
+            --infy-blue: #007CC3;
+            --infy-sky: #00A1E0;
+            --infy-light: #F2F5F7;
+            --infy-text: #1A1A1A;
+            --infy-muted: #595959;
+            --success-green: #008A4B;
+            --white: #ffffff;
+            --shadow-sm: 0 2px 8px rgba(0, 70, 133, 0.08);
+            --shadow-lg: 0 12px 30px rgba(0, 70, 133, 0.12);
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: var(--infy-light);
+            color: var(--infy-text);
+        }
+
+        /* --- SIDEBAR (Brand Anchored) --- */
+        .sidebar {
+            width: 280px;
+            background: var(--infy-navy);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .logo-container {
+            padding: 35px 25px;
+            background: rgba(0,0,0,0.15);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .logo i {
+            color: var(--infy-sky);
+            margin-right: 12px;
+            font-size: 28px;
+        }
+
+        .nav-menu {
+            padding: 25px 0;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 25px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 15px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--white);
+        }
+
+        .nav-item.active {
+            background: var(--infy-blue);
+            border-left: 4px solid var(--infy-sky);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .nav-item i { width: 25px; margin-right: 15px; font-size: 18px; }
+
+        /* --- MAIN CONTENT AREA --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px 60px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #E1E8EE;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: var(--infy-navy);
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .date-display {
+            color: var(--infy-muted);
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- TRAINING ENGINE CONTAINER --- */
+        .train-container {
+            background: var(--white);
+            border-radius: 4px; /* Professional sharp edges */
+            padding: 0;
+            box-shadow: var(--shadow-lg);
+            max-width: 1000px;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 1px solid #DEE2E6;
+        }
+
+        .train-header {
+            background: var(--infy-navy);
+            padding: 40px;
+            color: var(--white);
+        }
+
+        .train-header h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .train-header p {
+            opacity: 0.8;
+            font-size: 16px;
+            line-height: 1.6;
+            max-width: 700px;
+        }
+
+        .form-body {
+            padding: 40px;
+        }
+
+        /* --- PREMIUM UPLOAD AREA --- */
+        .upload-area {
+            border: 2px dashed #CED4DA;
+            border-radius: 8px;
+            padding: 50px 20px;
+            text-align: center;
+            background-color: #F8FAFB;
+            margin-bottom: 30px;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .upload-area:hover {
+            border-color: var(--infy-blue);
+            background-color: #F0F7FF;
+        }
+
+        .upload-icon {
+            font-size: 54px;
+            color: var(--infy-blue);
+            margin-bottom: 20px;
+        }
+
+        .upload-text h3 {
+            font-size: 20px;
+            color: var(--infy-navy);
+            margin-bottom: 10px;
+        }
+
+        .upload-text p {
+            color: var(--infy-muted);
+            font-size: 14px;
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            padding-top: 10px;
+        }
+
+        .submit-btn {
+            background: var(--infy-blue);
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 124, 195, 0.3);
+        }
+
+        .submit-btn:hover {
+            background: var(--infy-navy);
+            transform: translateY(-2px);
+        }
+
+        /* --- REQUIREMENTS GRID --- */
+        .requirements {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background: #F8FAFB;
+            padding: 30px;
+            border-top: 4px solid var(--infy-sky);
+        }
+
+        .req-item {
+            display: flex;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--infy-muted);
+        }
+
+        .req-item i {
+            color: var(--infy-blue);
+            margin-top: 3px;
+        }
+
+        /* --- DYNAMIC FEEDBACK BLOCKS --- */
+        .success-box {
+            background: #E6F4EA;
+            border-left: 6px solid var(--success-green);
+            padding: 30px;
+            margin-top: 30px;
+            animation: slideUp 0.5s ease;
+        }
+
+        .success-box h3 { color: var(--success-green); margin-bottom: 15px; }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 15px;
+            border: 1px solid #D1E7DD;
+            text-align: center;
+        }
+
+        .metric-card span { font-size: 12px; color: var(--infy-muted); display: block; }
+        .metric-card strong { font-size: 18px; color: var(--infy-navy); }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .requirements { grid-template-columns: 1fr; }
+            .metric-grid { grid-template-columns: 1fr 1fr; }
+            .main-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo-container">
+            <div class="logo">
+                <i class="fas fa-microchip"></i>
+                StudyTrack AI
+            </div>
+        </div>
+        
+        <div class="nav-menu">
+            <a href="{% url 'index' %}" class="nav-item">
+                <i class="fas fa-th-large"></i>
+                <span>Enterprise Dashboard</span>
+            </a>
+            <div class="nav-item active">
+                <i class="fas fa-brain"></i>
+                <span>Model Training Engine</span>
+            </div>
+            <a href="{% url 'single_predict' %}" class="nav-item">
+                <i class="fas fa-crosshairs"></i>
+                <span>Predictive Inference</span>
+            </a>
+            <a href="{% url 'bulk_predict' %}" class="nav-item">
+                <i class="fas fa-layer-group"></i>
+                <span>Bulk Processing</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <h1>Model Orchestration</h1>
+            <div class="date-display">
+                <i class="far fa-calendar-alt"></i>
+                <span id="current-date">System Time</span>
+            </div>
+        </div>
+        
+        <div class="train-container">
+            <div class="train-header">
+                <h2><i class="fas fa-server"></i> Initialize Neural Training</h2>
+                <p>Deploy high-performance machine learning models by ingesting curated educational datasets. Our engine utilizes Gradient Boosting for maximum predictive accuracy.</p>
+            </div>
+            
+            <div class="form-body">
+                <form method="post" enctype="multipart/form-data" id="trainForm">
+                    {% csrf_token %}
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-file-export"></i>
+                        </div>
+                        <div class="upload-text">
+                            <h3>Ingest Training Dataset</h3>
+                            <p>Drag and drop your secure CSV or Excel file here</p>
+                            <span id="fileName" style="color: var(--infy-blue); font-weight: 700; display: block; margin-top: 10px;"></span>
+                        </div>
+                        <input type="file" name="dataset" id="datasetInput" class="file-input" required accept=".csv,.xlsx,.xls">
+                    </div>
+                    
+                    <div class="btn-container">
+                        <button type="submit" class="submit-btn" id="submitBtn">
+                            <i class="fas fa-play"></i> Execute Training Cycle
+                        </button>
+                    </div>
+                </form>
+
+                <div class="requirements">
+                    <div class="req-item">
+                        <i class="fas fa-check-circle"></i>
+                        <p><strong>Volume:</strong> Minimum 100 historical records required.</p>
+                    </div>
+                    <div class="req-item">
+                        <i class="fas fa-check-circle"></i>
+                        <p><strong>Features:</strong> Attendance, Engagement, and Test Scores must be mapped.</p>
+                    </div>
+                    <div class="req-item">
+                        <i class="fas fa-check-circle"></i>
+                        <p><strong>Target:</strong> Dataset must include 'Final_Grade' column for labeling.</p>
+                    </div>
+                    <div class="req-item">
+                        <i class="fas fa-check-circle"></i>
+                        <p><strong>Format:</strong> UTF-8 encoded CSV or standard XLSX.</p>
+                    </div>
+                </div>
+
+                {% if success %}
+                <div class="success-box">
+                    <h3><i class="fas fa-shield-alt"></i> Training Successful</h3>
+                    <p>The model architecture has been optimized and deployed to the inference engine.</p>
+                    
+                    <div class="metric-grid">
+                        <div class="metric-card">
+                            <span>Data Volume</span>
+                            <strong>{{ rows }} Rows</strong>
+                        </div>
+                        <div class="metric-card">
+                            <span>Model Precision</span>
+                            <strong>{{ accuracy }}%</strong>
+                        </div>
+                        <div class="metric-card">
+                            <span>Algo Type</span>
+                            <strong>G.B.M</strong>
+                        </div>
+                        <div class="metric-card">
+                            <span>Status</span>
+                            <strong>LIVE</strong>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set date
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', options);
+
+        // File interaction
+        const fileInput = document.getElementById('datasetInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileNameDisplay = document.getElementById('fileName');
+
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const name = this.files[0].name;
+                fileNameDisplay.textContent = `READY FOR INGESTION: ${name}`;
+                uploadArea.style.borderColor = 'var(--success-green)';
+                uploadArea.style.background = '#F0FFF4';
+            }
+        });
+
+        // Loading state
+        document.getElementById('trainForm').addEventListener('submit', function() {
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Processing Neural Layers...';
+            btn.style.opacity = '0.7';
+            btn.style.pointerEvents = 'none';
+        });
+    </script>
+</body>
+</html>

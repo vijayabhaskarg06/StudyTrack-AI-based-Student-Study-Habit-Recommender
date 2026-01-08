@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+{% load custom_filters %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Prediction - StudyTrack AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f5f9ff;
+            color: #333;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #2c3e50 0%, #1a2530 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .logo-container {
+            padding: 25px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .logo i {
+            color: #4dabf7;
+            margin-right: 12px;
+            font-size: 26px;
+        }
+
+        .nav-menu {
+            padding: 30px 0;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #4dabf7;
+        }
+
+        .nav-item.active {
+            background-color: rgba(77, 171, 247, 0.1);
+            border-left: 4px solid #4dabf7;
+        }
+
+        .nav-item i {
+            width: 24px;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+
+        .user-info {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #4dabf7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+        }
+
+        .user-details h4 {
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .user-details p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex-grow: 1;
+            padding: 25px 35px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+        }
+
+        .date-display {
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        /* Bulk Prediction Container */
+        .bulk-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section-header h2 {
+            color: #2c3e50;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-header h2 i {
+            color: #f59f00;
+        }
+
+        .section-header p {
+            color: #7f8c8d;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed #f59f00;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            background-color: rgba(245, 159, 0, 0.05);
+            margin-bottom: 25px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            background-color: rgba(245, 159, 0, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #f59f00;
+            margin-bottom: 15px;
+        }
+
+        .upload-text h3 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .upload-text p {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .file-input-container {
+            display: inline-block;
+            position: relative;
+        }
+
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            background: linear-gradient(to right, #f59f00, #e67700);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .file-input-label:hover {
+            background: linear-gradient(to right, #e67700, #d9480f);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 159, 0, 0.3);
+        }
+
+        #fileName {
+            margin-top: 15px;
+            font-weight: 500;
+            color: #f59f00;
+            font-size: 15px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(to right, #f59f00, #e67700);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px auto 0;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(to right, #e67700, #d9480f);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 159, 0, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn i {
+            font-size: 18px;
+        }
+
+        /* File Requirements */
+        .requirements {
+            background-color: #f8f9fa;
+            border-left: 4px solid #f59f00;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+
+        .requirements h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .requirements ul {
+            padding-left: 20px;
+            color: #5c636a;
+        }
+
+        .requirements li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        /* Error Message Styles */
+        .error-box {
+            background-color: #ffe3e3;
+            border: 1px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 25px;
+            animation: fadeIn 0.5s;
+        }
+
+        .error-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .error-header i {
+            font-size: 24px;
+            color: #ff6b6b;
+        }
+
+        .error-header h3 {
+            color: #c92a2a;
+            font-size: 18px;
+        }
+
+        /* PREDICTED DATA SECTION - IMPROVED */
+        .predicted-data-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s;
+        }
+
+        .predicted-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .predicted-header h2 {
+            color: #2c3e50;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .predicted-header h2 i {
+            color: #339af0;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border-top: 4px solid;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            color: #6c757d;
+            font-size: 13px;
+        }
+
+        .stat-card.total { border-top-color: #4dabf7; }
+        .stat-card.avg { border-top-color: #40c057; }
+        .stat-card.max { border-top-color: #f59f00; }
+        .stat-card.min { border-top-color: #ff6b6b; }
+        .stat-card.total .value { color: #4dabf7; }
+        .stat-card.avg .value { color: #40c057; }
+        .stat-card.max .value { color: #f59f00; }
+        .stat-card.min .value { color: #ff6b6b; }
+
+        /* IMPROVED TABLE STYLES */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-top: 20px;
+            background: white;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 800px;
+        }
+
+        .results-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .results-table th {
+            font-weight: 600;
+            text-align: left;
+            padding: 16px 15px;
+            border-bottom: 2px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            white-space: nowrap;
+        }
+
+        .results-table tbody tr {
+            border-bottom: 1px solid #e9ecef;
+            transition: all 0.2s ease;
+        }
+
+        .results-table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .results-table td {
+            padding: 14px 15px;
+            color: #495057;
+            vertical-align: middle;
+        }
+
+        /* Column-specific styling */
+        .student-col {
+            font-weight: 600;
+            color: #2c3e50;
+            background-color: #f8f9fa;
+        }
+
+        .marks-col {
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .high-score {
+            color: #40c057;
+            background-color: rgba(64, 192, 87, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .medium-score {
+            color: #f59f00;
+            background-color: rgba(245, 159, 0, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .low-score {
+            color: #ff6b6b;
+            background-color: rgba(255, 107, 107, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .cluster-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 70px;
+        }
+
+        .cluster-0 { background-color: #4dabf7; color: white; }
+        .cluster-1 { background-color: #40c057; color: white; }
+        .cluster-2 { background-color: #f59f00; color: white; }
+        .cluster-3 { background-color: #ae3ec9; color: white; }
+        .cluster-4 { background-color: #ff6b6b; color: white; }
+
+        .numeric-col {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+
+        /* Striped rows for better readability */
+        .results-table tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .results-table tbody tr:nth-child(even):hover {
+            background-color: #f1f5f9;
+        }
+
+        /* RECOMMENDATIONS SECTION - IMPROVED */
+        .recommendations-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s;
+        }
+
+        .recommendations-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .recommendations-header h2 {
+            color: #2c3e50;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .recommendations-header h2 i {
+            color: #f59f00;
+        }
+
+        /* Recommendations Table */
+        .recommendations-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .recommendations-table thead {
+            background: linear-gradient(135deg, #f59f00 0%, #e67700 100%);
+            color: white;
+        }
+
+        .recommendations-table th {
+            font-weight: 600;
+            text-align: left;
+            padding: 16px 15px;
+            white-space: nowrap;
+        }
+
+        .recommendations-table tbody tr {
+            border-bottom: 1px solid #e9ecef;
+            transition: all 0.2s ease;
+        }
+
+        .recommendations-table tbody tr:hover {
+            background-color: #fff8e1;
+        }
+
+        .recommendations-table td {
+            padding: 14px 15px;
+            color: #495057;
+            vertical-align: top;
+        }
+
+        .sl-no {
+            font-weight: 600;
+            color: #2c3e50;
+            text-align: center;
+            width: 50px;
+            background-color: #f8f9fa;
+        }
+
+        .student-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .student-score {
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .recommendation-text {
+            line-height: 1.5;
+            color: #495057;
+            padding-right: 10px;
+        }
+
+        .priority-high {
+            color: #ff6b6b;
+            font-weight: 600;
+            font-size: 12px;
+            background-color: rgba(255, 107, 107, 0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .priority-medium {
+            color: #f59f00;
+            font-weight: 600;
+            font-size: 12px;
+            background-color: rgba(245, 159, 0, 0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .priority-low {
+            color: #40c057;
+            font-weight: 600;
+            font-size: 12px;
+            background-color: rgba(64, 192, 87, 0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        /* Summary Recommendations Cards */
+        .summary-recommendations {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .summary-recommendations h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recommendation-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .recommendation-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #40c057;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .recommendation-card .text {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .recommendation-card .count {
+            color: #6c757d;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* DATA INSIGHTS SECTION */
+        .insights-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            animation: fadeIn 0.8s;
+        }
+
+        .insights-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .insights-header h2 {
+            color: #2c3e50;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .insights-header h2 i {
+            color: #ae3ec9;
+        }
+
+        .download-btn {
+            background: linear-gradient(to right, #ae3ec9, #9c36b5);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .download-btn:hover {
+            background: linear-gradient(to right, #9c36b5, #862e9c);
+            transform: translateY(-2px);
+        }
+
+        /* Performance Cards */
+        .performance-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .performance-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border-top: 4px solid;
+            transition: transform 0.3s;
+        }
+
+        .performance-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .performance-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .performance-card .label {
+            color: #6c757d;
+            font-size: 13px;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #eee;
+            transition: transform 0.3s;
+        }
+
+        .chart-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .chart-container h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-img {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+        }
+
+        /* Performance Bands */
+        .performance-bands {
+            margin: 30px 0;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .performance-bands h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .band-item {
+            margin-bottom: 15px;
+        }
+
+        .band-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .band-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .band-count {
+            font-weight: 600;
+            color: #6c757d;
+        }
+
+        .band-progress-container {
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .band-progress {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        /* Correlation Grid */
+        .correlation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .correlation-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #eee;
+            text-align: center;
+        }
+
+        .correlation-item .feature {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .correlation-item .value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .correlation-positive {
+            color: #40c057;
+        }
+
+        .correlation-negative {
+            color: #ff6b6b;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 220px;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .nav-menu {
+                display: flex;
+                padding: 0;
+                overflow-x: auto;
+            }
+            
+            .nav-item {
+                padding: 15px 20px;
+                white-space: nowrap;
+                border-left: none;
+                border-bottom: 4px solid transparent;
+            }
+            
+            .nav-item:hover, .nav-item.active {
+                border-left: none;
+                border-bottom: 4px solid #4dabf7;
+            }
+            
+            .upload-section, .predicted-data-section, .recommendations-section, .insights-section {
+                padding: 20px;
+            }
+            
+            .recommendation-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .performance-cards, .stats-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .results-table, .recommendations-table {
+                font-size: 12px;
+            }
+            
+            .results-table th,
+            .results-table td,
+            .recommendations-table th,
+            .recommendations-table td {
+                padding: 8px 10px;
+            }
+        }
+        
+        .recommendations-header, .predicted-header, .insights-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* If you want the recommendations download button to match the results table button style */
+        .recommendations-section .download-btn {
+            background: linear-gradient(to right, #339af0, #228be6);
+        }
+
+        .recommendations-section .download-btn:hover {
+            background: linear-gradient(to right, #228be6, #1c7ed6);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="logo-container">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                StudyTrack AI
+            </div>
+        </div>
+        
+        <div class="nav-menu">
+            <a href="{% url 'index' %}" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{%url 'train'%}" class="nav-item">
+                <i class="fas fa-robot"></i>
+                <span>Train Model</span>
+            </a>
+            <a href="/single-predict/" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Single Prediction</span>
+            </a>
+            <a href="/bulk-predict/" class="nav-item active">
+                <i class="fas fa-file-upload"></i>
+                <span>Bulk Prediction</span>
+            </a>
+            <a href=".insights-section" class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>Insights</span>
+            </a>
+        </div>
+        
+    </div>
+    
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Bulk Prediction & Analysis</h1>
+            <div class="date-display">
+                <i class="far fa-calendar-alt"></i>
+                <span id="current-date">Loading...</span>
+            </div>
+        </div>
+        
+        <div class="bulk-container">
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-file-upload"></i> Bulk Prediction & Insights</h2>
+                    <p>Upload a CSV file containing student data to generate predictions for multiple students at once. The system will analyze the data and provide detailed insights.</p>
+                </div>
+                
+                <!-- Django Form -->
+                <form method="POST" enctype="multipart/form-data" id="bulkForm">
+                    {% csrf_token %}
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-file-csv"></i>
+                        </div>
+                        <div class="upload-text">
+                            <h3>Upload Student Data File</h3>
+                            <p>Drag & drop your CSV file here or click to browse</p>
+                        </div>
+                        
+                        <div class="file-input-container">
+                            <input type="file" name="file" id="fileInput" class="file-input" required accept=".csv,.xlsx,.xls">
+                            <label for="fileInput" class="file-input-label">
+                                <i class="fas fa-folder-open"></i> Choose File
+                            </label>
+                        </div>
+                        
+                        <div id="fileName"></div>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <i class="fas fa-cogs"></i> Upload & Predict
+                    </button>
+                </form>
+                
+                <!-- File Requirements -->
+                <div class="requirements">
+                    <h4><i class="fas fa-info-circle"></i> CSV File Requirements</h4>
+                    <ul>
+                        <li>File must be in CSV format with header row</li>
+                        <li>Required columns: StudyHours, SleepHours, SocialMediaHours, ExerciseHours, PlayHours, AttendancePercentage, PreviousMarks, AttentionLevel</li>
+                        <li>All values should be numerical (integers or decimals)</li>
+                        <li>File should not contain missing values</li>
+                        <li>Maximum file size: 10MB</li>
+                    </ul>
+                </div>
+                
+                <!-- ERROR MESSAGE -->
+                {% if error %}
+                <div class="error-box">
+                    <div class="error-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Upload Error</h3>
+                    </div>
+                    <p><b>{{ error }}</b></p>
+                    <p style="margin-top: 10px;">Please check your file format and try again.</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- SECTION 1: PREDICTED DATA - IMPROVED -->
+            {% if table_data %}
+            <div class="predicted-data-section">
+                <div class="predicted-header">
+                    <h2><i class="fas fa-table"></i> Predicted Data Results</h2>
+                    <button class="download-btn" onclick="downloadResults()">
+                        <i class="fas fa-download"></i> Download CSV
+                    </button>
+                </div>
+                
+                <!-- Quick Stats -->
+                {% if insights %}
+                <div class="stats-summary">
+                    <div class="stat-card total">
+                        <div class="value">{{ insights.total_students }}</div>
+                        <div class="label">Total Students</div>
+                    </div>
+                    <div class="stat-card avg">
+                        <div class="value">{{ insights.statistics.avg_marks|floatformat:1 }}</div>
+                        <div class="label">Average Marks</div>
+                    </div>
+                    <div class="stat-card max">
+                        <div class="value">{{ insights.statistics.max_marks|floatformat:1 }}</div>
+                        <div class="label">Highest Marks</div>
+                    </div>
+                    <div class="stat-card min">
+                        <div class="value">{{ insights.statistics.min_marks|floatformat:1 }}</div>
+                        <div class="label">Lowest Marks</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Results Table - Cleaned and Improved -->
+                <div class="table-container">
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                {% for col in table_columns %}
+                                    {% if col != "Recommendation" and col != "PreviousMarks" %}
+                                    <th>{{ col }}</th>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in table_data %}
+                            <tr>
+                                <td class="student-col">{{ forloop.counter }}</td>
+                                
+                                {% for col in table_columns %}
+                                    {% if col != "Recommendation" and col != "PreviousMarks" %}
+                                    <td class="{% if col in numeric_columns %}numeric-col{% endif %}">
+                                        {% if col == "Name" %}
+                                            <span class="student-name">
+                                                {{ row.Name }}
+                                            </span>
+                                        {% elif col == "PredictedTestMarks" %}
+                                            <span class="marks-col {% if row.PredictedTestMarks >= 85 %}high-score{% elif row.PredictedTestMarks >= 70 %}medium-score{% else %}low-score{% endif %}">
+                                                {{ row.PredictedTestMarks|floatformat:1 }}
+                                            </span>
+                                        {% elif col == "Cluster" %}
+                                            <span class="cluster-badge cluster-{{ row.Cluster }}">
+                                                Cluster {{ row.Cluster }}
+                                            </span>
+                                        {% elif col == "StudyHours" %}
+                                            {{ row.StudyHours|default:""|floatformat:1 }}
+                                        {% elif col == "SleepHours" %}
+                                            {{ row.SleepHours|default:""|floatformat:1 }}
+                                        {% elif col == "SocialMediaHours" %}
+                                            {{ row.SocialMediaHours|default:""|floatformat:1 }}
+                                        {% elif col == "ExerciseHours" %}
+                                            {{ row.ExerciseHours|default:""|floatformat:1 }}
+                                        {% elif col == "PlayHours" %}
+                                            {{ row.PlayHours|default:""|floatformat:1 }}
+                                        {% elif col == "AttendancePercentage" %}
+                                            {{ row.AttendancePercentage|default:""|floatformat:1 }}%
+                                        {% elif col == "AttentionLevel" %}
+                                            {{ row.AttentionLevel|default:""|floatformat:1 }}/10
+                                        {% else %}
+                                            {{ row|default:"" }}
+                                        {% endif %}
+                                    </td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- SECTION 2: RECOMMENDATIONS - NEW SEPARATE TABLE -->
+            {% if table_data %}
+            <div class="recommendations-section">
+                <div class="recommendations-header">
+                    <h2>
+                        <i class="fas fa-lightbulb"></i> 
+                        Personalized Recommendations
+                    </h2>
+                    <button class="download-btn" onclick="downloadRecommendationsCSV()">
+                        <i class="fas fa-download"></i> Download Recommendations
+                    </button>
+                </div>
+                
+                <!-- Recommendations Table with Serial Numbers -->
+                <div class="table-container">
+                    <table class="recommendations-table">
+                        <thead>
+                            <tr>
+                                <th>SL No</th>
+                                <th>Student</th>
+                                <th>Predicted Marks</th>
+                                <th>Performance</th>
+                                <th>Priority</th>
+                                <th>Recommendation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in table_data %}
+                            <tr>
+                                <td class="sl-no">{{ forloop.counter }}</td>
+                                <td class="student-name">
+                                    {{ row.Name }}
+                                </td>
+                                <td class="student-score {% if row.PredictedTestMarks >= 85 %}high-score{% elif row.PredictedTestMarks >= 70 %}medium-score{% else %}low-score{% endif %}">
+                                    {{ row.PredictedTestMarks|floatformat:1 }}
+                                </td>
+                                <td>
+                                    {% if row.PredictedTestMarks >= 85 %}
+                                    <span class="high-score">Excellent</span>
+                                    {% elif row.PredictedTestMarks >= 70 %}
+                                    <span class="medium-score">Good</span>
+                                    {% elif row.PredictedTestMarks >= 50 %}
+                                    <span style="color: #fd7e14; background-color: rgba(253, 126, 20, 0.1); padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600;">Average</span>
+                                    {% else %}
+                                    <span class="low-score">Needs Help</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if row.PredictedTestMarks < 50 %}
+                                    <span class="priority-high">High Priority</span>
+                                    {% elif row.PredictedTestMarks < 70 %}
+                                    <span class="priority-medium">Medium Priority</span>
+                                    {% else %}
+                                    <span class="priority-low">Low Priority</span>
+                                    {% endif %}
+                                </td>
+                                <td class="recommendation-text">
+                                    <i class="fas fa-comment-alt" style="color: #4dabf7; margin-right: 5px;"></i>
+                                    {{ row.Recommendation }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Top Recommendations Summary -->
+                {% if insights and insights.top_recommendations %}
+                <div class="summary-recommendations">
+                    <h3><i class="fas fa-bullhorn"></i> Top Recommendations Summary</h3>
+                    <div class="recommendation-cards">
+                        {% for rec, count in insights.top_recommendations %}
+                        <div class="recommendation-card">
+                            <div class="text">{{ rec }}</div>
+                            <div class="count">
+                                <i class="fas fa-user-graduate"></i> {{ count }} students need this
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <!-- SECTION 3: DATA INSIGHTS & VISUALIZATIONS -->
+            {% if insights and charts %}
+            <div class="insights-section">
+                <div class="insights-header">
+                    <h2><i class="fas fa-chart-bar"></i> Data Insights & Visualizations</h2>
+                    <button class="download-btn" onclick="downloadReport()">
+                        <i class="fas fa-file-pdf"></i> Download Report
+                    </button>
+                </div>
+                
+                <!-- Performance Cards -->
+                <div class="performance-cards">
+                    <div class="performance-card" style="border-top-color: #7950f2;">
+                        <div class="value" style="color: #7950f2;">{{ insights.performance_distribution.excellent.count }}</div>
+                        <div class="label">High Performers (85+)</div>
+                    </div>
+                    <div class="performance-card" style="border-top-color: #20c997;">
+                        <div class="value" style="color: #20c997;">{{ insights.performance_distribution.good.count }}</div>
+                        <div class="label">Good (70-84)</div>
+                    </div>
+                    <div class="performance-card" style="border-top-color: #fd7e14;">
+                        <div class="value" style="color: #fd7e14;">{{ insights.performance_distribution.average.count }}</div>
+                        <div class="label">Average (50-69)</div>
+                    </div>
+                    <div class="performance-card" style="border-top-color: #fa5252;">
+                        <div class="value" style="color: #fa5252;">{{ insights.performance_distribution.needs_improvement.count }}</div>
+                        <div class="label">Needs Help (&lt;50)</div>
+                    </div>
+                </div>
+                
+                <!-- Charts Section -->
+                <div class="charts-grid">
+                    <!-- Performance Distribution -->
+                    <div class="chart-container">
+                        <h3><i class="fas fa-chart-pie"></i> Performance Distribution</h3>
+                        <img src="data:image/png;base64,{{ charts.performance_pie }}" class="chart-img" alt="Performance Distribution">
+                    </div>
+                    
+                    <!-- Marks Histogram -->
+                    <div class="chart-container">
+                        <h3><i class="fas fa-chart-bar"></i> Marks Distribution</h3>
+                        <img src="data:image/png;base64,{{ charts.marks_histogram }}" class="chart-img" alt="Marks Histogram">
+                    </div>
+                    
+                    <!-- Correlation Heatmap -->
+                    <div class="chart-container">
+                        <h3><i class="fas fa-fire"></i> Feature Correlation</h3>
+                        <img src="data:image/png;base64,{{ charts.correlation_heatmap }}" class="chart-img" alt="Correlation Heatmap">
+                    </div>
+                    
+                    <!-- Study vs Marks -->
+                    <div class="chart-container">
+                        <h3><i class="fas fa-book"></i> Study Hours vs Marks</h3>
+                        <img src="data:image/png;base64,{{ charts.study_vs_marks }}" class="chart-img" alt="Study Hours vs Marks">
+                    </div>
+                </div>
+                
+                <!-- Performance Bands -->
+                <div class="performance-bands">
+                    <h3><i class="fas fa-layer-group"></i> Performance Bands Distribution</h3>
+                    {% for band, count in insights.performance_bands.items %}
+                    <div class="band-item">
+                        <div class="band-header">
+                            <span class="band-label">{{ band }}</span>
+                            <span class="band-count">{{ count }} students</span>
+                        </div>
+                        <div class="band-progress-container">
+                            <div class="band-progress" style="width: {% widthratio count insights.total_students 100 %}%; background-color: 
+                                {% if band == '90+' %} #40c057
+                                {% elif band == '80-89' %} #82c91e
+                                {% elif band == '70-79' %} #fab005
+                                {% elif band == '60-69' %} #fd7e14
+                                {% elif band == '50-59' %} #fa5252
+                                {% else %} #868e96
+                                {% endif %}">
+                                {% widthratio count insights.total_students 100 %}%
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Correlation Analysis -->
+                {% if insights.correlations %}
+                <div class="correlation-grid">
+                    {% for feature, value in insights.correlations.items %}
+                    <div class="correlation-item">
+                        <div class="feature">{{ feature }}</div>
+                        <div class="value {% if value > 0 %}correlation-positive{% else %}correlation-negative{% endif %}">
+                            {% if value > 0 %}+{% endif %}{{ value|floatformat:2 }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <!-- Upload Guide -->
+            <div style="margin-top: 30px; background-color: white; border-radius: 12px; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                <h3 style="color: #2c3e50; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-question-circle"></i> How to Prepare Your Data File
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                    <div style="padding: 15px; border-left: 4px solid #4dabf7; background-color: #f8f9fa; border-radius: 8px;">
+                        <h4 style="color: #2c3e50; margin-bottom: 8px;">Sample Format</h4>
+                        <p style="color: #6c757d; font-size: 14px;">Include columns: StudyHours, SleepHours, SocialMediaHours, ExerciseHours, PlayHours, AttendancePercentage, PreviousMarks, AttentionLevel</p>
+                    </div>
+                    <div style="padding: 15px; border-left: 4px solid #40c057; background-color: #f8f9fa; border-radius: 8px;">
+                        <h4 style="color: #2c3e50; margin-bottom: 8px;">Data Quality</h4>
+                        <p style="color: #6c757d; font-size: 14px;">Ensure all values are numeric. Remove any text, symbols, or empty cells for accurate predictions.</p>
+                    </div>
+                    <div style="padding: 15px; border-left: 4px solid #f59f00; background-color: #f8f9fa; border-radius: 8px;">
+                        <h4 style="color: #2c3e50; margin-bottom: 8px;">Download Template</h4>
+                        <p style="color: #6c757d; font-size: 14px;">Use our <a href="#" style="color: #f59f00; font-weight: 600;">template CSV</a> to ensure proper formatting for your data.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date
+        function setCurrentDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = now.toLocaleDateString('en-US', options);
+            document.getElementById('current-date').textContent = formattedDate;
+        }
+        
+        // File upload display
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const fileNameDisplay = document.getElementById('fileName');
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                const fileSize = (file.size / (1024*1024)).toFixed(2);
+                fileNameDisplay.innerHTML = `<i class="fas fa-file"></i> Selected: <strong>${file.name}</strong> (${fileSize} MB)`;
+                
+                // Update upload area style
+                document.getElementById('uploadArea').style.borderColor = '#40c057';
+                document.getElementById('uploadArea').style.backgroundColor = 'rgba(64, 192, 87, 0.05)';
+            } else {
+                fileNameDisplay.innerHTML = '';
+                document.getElementById('uploadArea').style.borderColor = '#f59f00';
+                document.getElementById('uploadArea').style.backgroundColor = 'rgba(245, 159, 0, 0.05)';
+            }
+        });
+        
+        // Form submission loading indicator
+        document.getElementById('bulkForm').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            
+            // Only show loading if we're not already showing results
+            if (!document.querySelector('.predicted-data-section')) {
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                submitBtn.disabled = true;
+                
+                // Change button style
+                submitBtn.style.background = 'linear-gradient(to right, #adb5bd, #868e96)';
+                submitBtn.style.cursor = 'not-allowed';
+                
+                // Revert after 8 seconds (in case the page doesn't reload)
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    submitBtn.style.background = 'linear-gradient(to right, #f59f00, #e67700)';
+                    submitBtn.style.cursor = 'pointer';
+                }, 8000);
+            }
+        });
+        
+        // Download results functionality
+        function downloadResults() {
+            // Show loading state
+            const downloadBtn = document.querySelector('.download-btn');
+            const originalText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing CSV...';
+            downloadBtn.disabled = true;
+            
+            // Trigger download
+            window.location.href = '/bulk-predict/download-csv/';
+            
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+            }, 3000);
+        }
+
+        function downloadReport() {
+            // Show loading state
+            const downloadBtn = document.querySelectorAll('.download-btn')[1]; // Get second download button
+            const originalText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Report...';
+            downloadBtn.disabled = true;
+            
+            // Trigger download
+            window.location.href = '/bulk-predict/download-report/';
+            
+            // Reset button after 5 seconds
+            setTimeout(() => {
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+            }, 5000);
+        }
+        function downloadRecommendationsCSV() {
+            const downloadBtn = document.querySelector('.recommendations-section .download-btn');
+            const originalText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing CSV...';
+            downloadBtn.disabled = true;
+            
+            // If you have a Django endpoint for downloading recommendations CSV
+            window.location.href = '/bulk-predict/download-recommendations-csv/';
+            
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+            }, 3000);
+        }
+        
+        // Animate progress bars on page load
+        function animateProgressBars() {
+            const progressBars = document.querySelectorAll('.band-progress');
+            progressBars.forEach(bar => {
+                const originalWidth = bar.style.width;
+                bar.style.width = '0%';
+                
+                setTimeout(() => {
+                    bar.style.width = originalWidth;
+                }, 300);
+            });
+        }
+        
+        // Add sort functionality to tables
+        function sortTable(tableId, columnIndex) {
+            const table = document.getElementById(tableId);
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            const isNumeric = rows[0].querySelectorAll('td')[columnIndex].classList.contains('numeric-col');
+            
+            rows.sort((a, b) => {
+                const aVal = a.querySelectorAll('td')[columnIndex].textContent;
+                const bVal = b.querySelectorAll('td')[columnIndex].textContent;
+                
+                if (isNumeric) {
+                    return parseFloat(aVal) - parseFloat(bVal);
+                } else {
+                    return aVal.localeCompare(bVal);
+                }
+            });
+            
+            // Clear and re-add sorted rows
+            rows.forEach(row => tbody.appendChild(row));
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            setCurrentDate();
+            
+            // Highlight current page in navigation
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === currentPath) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // If there are insights, animate the charts and bars
+            if (document.querySelector('.insights-section')) {
+                setTimeout(animateProgressBars, 500);
+                
+                // Add animation to charts
+                const chartContainers = document.querySelectorAll('.chart-container');
+                chartContainers.forEach((container, index) => {
+                    container.style.animation = `slideIn 0.5s ease ${index * 0.1}s both`;
+                });
+            }
+            
+            // Add scroll to insights button functionality
+            document.querySelector('a[href=".insights-section"]')?.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (document.querySelector('.insights-section')) {
+                    document.querySelector('.insights-section').scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+            
+            // Add hover effects to table rows
+            const tableRows = document.querySelectorAll('.results-table tbody tr, .recommendations-table tbody tr');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                });
+                row.addEventListener('mouseleave', function() {
+                    this.style.boxShadow = 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
